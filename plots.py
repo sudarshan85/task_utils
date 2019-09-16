@@ -185,7 +185,7 @@ def plot_thresh_range(ax, y_true, prob, lower=0, upper=1, n_vals=5):
   ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5)
   ax.legend(loc='upper right')
 
-def plot_youden(ax, y_true, prob, lower=0, upper=1, n_vals=5):
+def youden(y_true, prob, ax=None, lower=0, upper=1, n_vals=5):
   youden_idxs = np.zeros(n_vals)
   thresh_range = np.round(np.linspace(lower, upper, n_vals), 2)
   
@@ -199,8 +199,12 @@ def plot_youden(ax, y_true, prob, lower=0, upper=1, n_vals=5):
   df = pd.DataFrame(youden_idxs, index=['youden_idx'], columns=thresh_range)
   df=df.stack().reset_index()
   df.columns = ['Metric','threshold','youden_idx']
-  ax = sns.pointplot(x='threshold', y='youden_idx',data=df)
-  ax.set_xlabel('Threshold')
-  ax.set_ylabel('Youden Index')
-  ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
-  ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5)  
+
+  if ax:
+    ax = sns.pointplot(x='threshold', y='youden_idx',data=df)
+    ax.set_xlabel('Threshold')
+    ax.set_ylabel('Youden Index')
+    ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
+    ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
+  else:
+    return df.loc[df['youden_idx'].idxmax()]['threshold'] 

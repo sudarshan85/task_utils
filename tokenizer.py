@@ -2,7 +2,14 @@
 import unicodedata
 import re
 import spacy
+
+from spacy.lang.en.stop_words import STOP_WORDS
 sci = spacy.load('en_core_sci_sm', disable=['parser', 'tagger', 'ner'])
+
+with open('clinical_stopwords.txt', 'r') as f:
+  clinical_stop_words = f.read().splitlines()
+stop_words = set(clinical_stop_words + list(STOP_WORDS))
+
 
 def tokenize(text, stop_words=set()):
   text = text.lower()
