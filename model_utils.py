@@ -25,7 +25,7 @@ def get_best_params(clf, x_train, y_train, param_space, **kwargs):
   
   return param_search.best_params_
 
-def sk_run_iters(data_df, group_id, clf_model, tokenizer, params, threshold, model_dir, n_iters=100, start_seed=127):
+def run_iters(data_df, group_id, clf_model, tokenizer, params, threshold, model_dir, n_iters=100, start_seed=127):
   targs, preds, probs = [], [], []
   tfidf_params = {
   'ngram_range': (1, 2),
@@ -40,4 +40,3 @@ def sk_run_iters(data_df, group_id, clf_model, tokenizer, params, threshold, mod
   for seed in tqdm(seeds, desc='Run #'):
     df = set_group_splits(data_df, group_col=group_id, seed=seed)
     vectorizer = TfidfVectorizer(**tfidf_params)
-    
