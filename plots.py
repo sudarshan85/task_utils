@@ -81,41 +81,6 @@ def plot_prob(ax, df, threshold, starting_day, ending_day, interval_hours, is_ag
   ax.legend(loc='upper left')
   ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
 
-def plot_cm(ax, cm, classes, normalize=False, title=None, cmap=plt.cm.Blues):
-  """
-  This function prints and plots the confusion matrix.
-  Normalization can be applied by setting `normalize=True`.
-  """
-  if normalize:
-      cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-
-  im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
-  ax.figure.colorbar(im, ax=ax)
-
-  # We want to show all ticks and label them with the respective list entries
-  ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]), xticklabels=classes,
-      yticklabels=classes, title=title, ylabel='True label', xlabel='Predicted label')
-
-  # Rotate the tick labels and set their alignment.
-  plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-
-  # Loop over data dimensions and create text annotations.
-  fmt = '.2f' if normalize else 'd'
-  thresh = cm.max() / 2.
-  for i in range(cm.shape[0]):
-    for j in range(cm.shape[1]):
-      ax.text(j, i, format(cm[i, j], fmt), ha='center', va='center', color='white' if cm[i, j] >
-          thresh else 'black')
-
-def plot_model_roc(ax, y_true, prob):
-  fpr, tpr, _ = roc_curve(y_true, prob)
-  ax.set_ylabel('Sensitivity')
-  ax.set_xlabel('1 - Specificity')
-  ax.plot([0, 1], [0, 1], linestyle='--')
-  ax.plot(fpr, tpr, marker='.')
-  ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
-  ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5)
-
 def plot_mean_roc(ax, y_trues, probs, is_individual=False):
   curve_color = 'navy'
   if is_individual:
@@ -150,19 +115,6 @@ def plot_mean_roc(ax, y_trues, probs, is_individual=False):
   ax.set_ylabel('Sensitivity')
   ax.set_xlabel('1 - Specificity')
   
-
-def plot_auprc(ax, y_true, probs):
-  ap = average_precision_score(y_true, probs)
-  precision, recall, _ = precision_recall_curve(y_true, probs)
-  auprc = auc(recall, precision)
-
-  ax.set_xlabel("Sensitivity")
-  ax.set_ylabel("PPV")
-  # ax.set_title("Precision-Recall Curve")
-  ax.plot([0, 1], [0.5, 0.5], linestyle='--')
-  ax.plot(recall, precision, marker='.')
-
-  return ap, auprc
 
 def plot_thresh_range(ax, y_true, prob, lower=0, upper=1, n_vals=5):
   metrics = np.zeros((4, n_vals))
