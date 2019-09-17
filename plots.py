@@ -15,6 +15,15 @@ from spacy.lang.en.stop_words import STOP_WORDS
 from sklearn.metrics import roc_auc_score, roc_curve, auc, confusion_matrix
 from sklearn.metrics import average_precision_score, precision_recall_curve
 
+def plot_model_roc(ax, y_true, prob):
+  fpr, tpr, _ = roc_curve(y_true, prob)
+  ax.set_ylabel('Sensitivity')
+  ax.set_xlabel('1 - Specificity')
+  ax.plot([0, 1], [0, 1], linestyle='--')
+  ax.plot(fpr, tpr, marker='.')
+  ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
+  ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5)
+
 def get_wordcloud(feature_names, scores, n_words='all'):
   if n_words == 'all':
     n_words = len(feature_names)
