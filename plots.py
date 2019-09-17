@@ -81,7 +81,7 @@ def plot_prob(ax, df, threshold, starting_day, ending_day, interval_hours, is_ag
   ax.legend(loc='upper left')
   ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
 
-def plot_confusion_matrix(ax, cm, classes, normalize=False, title=None, cmap=plt.cm.Blues):
+def plot_cm(ax, cm, classes, normalize=False, title=None, cmap=plt.cm.Blues):
   """
   This function prints and plots the confusion matrix.
   Normalization can be applied by setting `normalize=True`.
@@ -107,7 +107,7 @@ def plot_confusion_matrix(ax, cm, classes, normalize=False, title=None, cmap=plt
       ax.text(j, i, format(cm[i, j], fmt), ha='center', va='center', color='white' if cm[i, j] >
           thresh else 'black')
 
-def plot_roc(ax, y_true, prob):
+def plot_model_roc(ax, y_true, prob):
   fpr, tpr, _ = roc_curve(y_true, prob)
   ax.set_ylabel('Sensitivity')
   ax.set_xlabel('1 - Specificity')

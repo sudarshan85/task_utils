@@ -23,7 +23,7 @@ def get_best_params(clf, x_train, y_train, param_space, **kwargs):
   param_search = RandomizedSearchCV(clf, param_space, **kwargs)
   param_search.fit(x_train, y_train)
   
-  return param_search.best_params_
+  return param_search.best_params_, pd.DataFrame(param_search.cv_results_)
 
 def run_iters(data_df, group_id, clf_model, tokenizer, params, threshold, model_dir, n_iters=100, start_seed=127):
   targs, preds, probs = [], [], []
