@@ -146,26 +146,49 @@ def plot_thresh_range(ax, y_true, prob, lower=0, upper=1, n_vals=5):
   ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5)
   ax.legend(loc='upper right')
 
-def youden(y_true, prob, ax=None, lower=0, upper=1, n_vals=5):
-  youden_idxs = np.zeros(n_vals)
-  thresh_range = np.round(np.linspace(lower, upper, n_vals), 2)
+def threshold_guide(y_test, prob, ax, metric='youden', beta=None, n_vals=10, granularity=10):
+  thresh_range = np.round(np.linspace(0, 1, n_vals), 2)
+  cms = np.zeros((n_vals, 2, 2))
   
   for i, thresh in enumerate(thresh_range):
     y_pred = (prob > thresh).astype(np.int64)
-    cm = confusion_matrix(y_true, y_pred)
-    tn,fp,fn,tp = cm[0][0],cm[0][1],cm[1][0],cm[1][1]
-    youden_idxs[i] = tp/(tp+fn) + tn/(tn+fp)
-    
-  youden_idxs = youden_idxs.reshape(1,-1)
-  df = pd.DataFrame(youden_idxs, index=['youden_idx'], columns=thresh_range)
-  df=df.stack().reset_index()
-  df.columns = ['Metric','threshold','youden_idx']
+    cms[i] = confusion_matrix(y_test, y_pred)
 
-  if ax:
-    ax = sns.pointplot(x='threshold', y='youden_idx',data=df)
-    ax.set_xlabel('Threshold')
-    ax.set_ylabel('Youden Index')
-    ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
-    ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
+  se = cms[:, 1, 1] / (cms[:, 1, 1] + cms[:, 1, 0])
+  sp = cms[:, 0, 0] / (cms[:, 0, 0] + cms[:, 0, 1])
+  ppv = cms[:, 1, 1] / (cms[:, 1, 1] + cms[:, 0, 1])
+    
+  if metric == 'youden':
+    metrics = se + sp
+    metric = 'Youden Index'
+  elif metric == 'weighted_youden':
+    if beta is None:
+      raise NameError(f"Weight value beta not specified for {metric}")
+    metrics = beta * se + (1 - beta) * sp
+    metric = f'Youden Index with weight {beta}'
+  elif metric == 'f1':     
+    metrics = (2 * se * ppv) / (se + ppv)
+  elif metric == 'fbeta':
+    if beta is None:
+      raise NameError(f"Weight value beta not specified for {metric}")    
+    metrics = (1 + beta ** 2) * (se * ppv) / ((ppv) * (beta ** 2) + se)
+    metric = f'f{beta}'
   else:
-    return df.loc[df['youden_idx'].idxmax()]['threshold'] 
+    raise ValueError(f"{metric} is not a valid metric. Valid metrics are: 'youden', 'weighted_youden', 'f1', 'fbeta'")
+   
+  metrics = metrics.reshape(1,-1)
+  df = pd.DataFrame(metrics, index=[metric], columns=thresh_range)
+  df=df.stack().reset_index()
+  df.columns = ['Metric','threshold', metric]
+
+  ax = sns.pointplot(x='threshold', y=metric,data=df)
+  ax.set_xlabel('Threshold')
+  ax.set_ylabel(metric)
+  ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
+  ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
+  tick_range = np.linspace(*ax.get_xlim(), granularity)
+  label_range = np.round(np.linspace(0, 1, granularity), 2)
+  ax.set_xticks(tick_range)
+  ax.set_xticklabels(label_range)
+  
+  return df.loc[df[metric].idxmax()]['threshold'] 
