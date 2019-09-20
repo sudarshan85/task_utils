@@ -41,7 +41,7 @@ def run_iters(data_df, clf_model, params, vectorizer, threshold, workdir, prefix
     
     clf = clf_model(**params)
     clf.fit(x_train, y_train)
-    pickle.dump(clf, open((workdir/f'models/{prefix}_seed{seed}.pkl'), 'wb'))
+    pickle.dump(clf, open((workdir/f'models/{prefix}_seed_{seed}.pkl'), 'wb'))
     
     prob = clf.predict_proba(x_test)
     probs.append(prob)

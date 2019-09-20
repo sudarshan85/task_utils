@@ -115,7 +115,7 @@ def plot_mean_roc(ax, y_true, y_probas):
 
   mean_roc = np.mean(np.array(rocs), axis=0)
   color = plt.cm.get_cmap('nipy_spectral')(0.5)
-  ax.plot(base_fpr, mean_tprs, lw=2, color=color, label=f'Average AUC = {mean_roc:0.2f}')
+  ax.plot(base_fpr, mean_tprs, lw=2, color=color, label=f'Average AUC = {mean_roc:0.3f}')
 
   ax.plot([0, 1], [0, 1], 'k--', lw=2)
   ax.set_xlim([0.0, 1.0])
