@@ -25,18 +25,31 @@ def get_best_params(clf, x_train, y_train, param_space, **kwargs):
   
   return param_search.best_params_, pd.DataFrame(param_search.cv_results_)
 
-def run_iters(data_df, group_id, clf_model, tokenizer, params, threshold, model_dir, n_iters=100, start_seed=127):
+def run_iters(data_df, clf_model, params, vectorizer, threshold, workdir, prefix, n_iters=100, start_seed=127):
   targs, preds, probs = [], [], []
-  tfidf_params = {
-  'ngram_range': (1, 2),
-  'tokenizer': tokenizer,
-  'min_df': 6,
-  'max_features': 52_000,
-  'binary': True,
-  'sublinear_tf': True,  
-  }
-
   seeds = list(range(start_seed, start_seed + n_iters))
   for seed in tqdm(seeds, desc='Run #'):
-    df = set_group_splits(data_df, group_col=group_id, seed=seed)
-    vectorizer = TfidfVectorizer(**tfidf_params)
+    df = set_group_splits(data_df.copy(), group_col='encounter_id', seed=seed)
+    train_df = df.loc[df['split'] == 'train', ['note', 'imminent_adm_label']]
+    test_df = df.loc[df['split'] == 'test', ['note', 'imminent_adm_label']]
+    
+    x_train = vectorizer.fit_transform(train_df['note'])
+    x_test = vectorizer.transform(test_df['note'])    
+    y_train = train_df['imminent_adm_label'].to_numpy()
+    y_test = test_df['imminent_adm_label'].to_numpy()
+    targs.append(y_test)
+    
+    clf = clf_model(**params)
+    clf.fit(x_train, y_train)
+    pickle.dump(clf, open((workdir/f'models/{prefix}_seed{seed}.pkl'), 'wb'))
+    
+    prob = clf.predict_proba(x_test)
+    probs.append(prob)
+    
+    y_pred = (prob[:, 1] > threshold).astype(np.int64)
+    preds.append(y_pred)
+    
+  with open(workdir/f'{prefix}_preds.pkl', 'wb') as f:
+    pickle.dump(targs, f)
+    pickle.dump(probs, f)
+    pickle.dump(preds, f)

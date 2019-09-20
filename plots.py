@@ -90,17 +90,19 @@ def plot_prob(ax, df, threshold, starting_day, ending_day, interval_hours, is_ag
   ax.legend(loc='upper left')
   ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
 
-def plot_mean_roc(ax, y_trues, probs, is_individual=False):
-  curve_color = 'navy'
-  if is_individual:
-    curve_color  = 'white'
-
+def plot_mean_roc(ax, y_true, y_probas):
+  y_true = np.array(y_true)
+  y_probas = np.array(y_probas)
+  probas = y_probas
+  
   tprs = []
-  base_fpr = np.linspace(0, 1, len(y_trues))
+  base_fpr = np.linspace(0, 1, 100)
+  rocs = []
 
-  for i, (y_test, pos_prob) in enumerate(zip(y_trues, probs)):
-    fpr, tpr, _ = roc_curve(y_test, pos_prob)
-    tpr = interp(base_fpr, fpr, tpr)
+  for i, (y_test, prob) in enumerate(zip(y_true, y_probas)):
+    fpr, tpr, _ = roc_curve(y_test, prob[:, 1])
+    rocs.append(auc(fpr, tpr))
+    tpr = interp(base_fpr, fpr, tpr)    
     tpr[0] = 0.0
     tprs.append(tpr)
 
@@ -111,19 +113,19 @@ def plot_mean_roc(ax, y_trues, probs, is_individual=False):
   tprs_upper = np.minimum(mean_tprs + std, 1)
   tprs_lower = mean_tprs - std
 
-  ax.plot(base_fpr, mean_tprs, color=curve_color, marker='.')
-  if is_individual:
-    for i, (y_test, pos_prob) in enumerate(zip(y_trues, probs)):
-      fpr, tpr, _ = roc_curve(y_test, pos_prob)
-      ax.plot(fpr, tpr, color='blue', alpha=0.15)
-      ax.fill_between(base_fpr, tprs_lower, tprs_upper, color='grey', alpha=0.3)
+  mean_roc = np.mean(np.array(rocs), axis=0)
+  color = plt.cm.get_cmap('nipy_spectral')(0.5)
+  ax.plot(base_fpr, mean_tprs, lw=2, color=color, label=f'Average AUC = {mean_roc:0.2f}')
 
-  ax.plot([0, 1], [0, 1], color='silver', linestyle=':')
-  ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
-  ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5)
-  ax.set_ylabel('Sensitivity')
-  ax.set_xlabel('1 - Specificity')
+  ax.plot([0, 1], [0, 1], 'k--', lw=2)
+  ax.set_xlim([0.0, 1.0])
+  ax.set_ylim([0.0, 1.05])
+  ax.set_xlabel('False Positive Rate', fontsize='medium')
+  ax.set_ylabel('True Positive Rate', fontsize='medium')
+  ax.tick_params(labelsize='medium')
+  ax.legend(loc='lower right', fontsize='medium')
   
+  return mean_roc  
 
 def plot_thresh_range(ax, y_true, prob, lower=0, upper=1, n_vals=5):
   metrics = np.zeros((4, n_vals))
