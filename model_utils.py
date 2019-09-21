@@ -25,7 +25,7 @@ def get_best_params(clf, x_train, y_train, param_space, **kwargs):
   
   return param_search.best_params_, pd.DataFrame(param_search.cv_results_)
 
-def run_iters(data_df, clf_model, params, vectorizer, threshold, workdir, prefix, n_iters=100, start_seed=127):
+def run_iters(data_df, clf_model, params, vectorizer, threshold, workdir, prefix, split_pct=0.15, n_iters=100, start_seed=127):
   targs, preds, probs = [], [], []
   seeds = list(range(start_seed, start_seed + n_iters))
   for seed in tqdm(seeds, desc='Run #'):
@@ -39,7 +39,11 @@ def run_iters(data_df, clf_model, params, vectorizer, threshold, workdir, prefix
     y_test = test_df['imminent_adm_label'].to_numpy()
     targs.append(y_test)
     
-    clf = clf_model(**params)
+    if params:      
+      clf = clf_model(**params)
+    else:
+      clf = clf_model
+
     clf.fit(x_train, y_train)
     pickle.dump(clf, open((workdir/f'models/{prefix}_seed_{seed}.pkl'), 'wb'))
     
