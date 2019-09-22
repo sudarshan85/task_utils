@@ -29,7 +29,7 @@ def run_iters(data_df, clf_model, params, vectorizer, threshold, workdir, prefix
   targs, preds, probs = [], [], []
   seeds = list(range(start_seed, start_seed + n_iters))
   for seed in tqdm(seeds, desc='Run #'):
-    df = set_group_splits(data_df.copy(), group_col='encounter_id', seed=seed)
+    df = set_group_splits(data_df.copy(), group_col='encounter_id', seed=seed, pct=split_pct)
     train_df = df.loc[df['split'] == 'train', ['note', 'imminent_adm_label']]
     test_df = df.loc[df['split'] == 'test', ['note', 'imminent_adm_label']]
     
@@ -42,7 +42,7 @@ def run_iters(data_df, clf_model, params, vectorizer, threshold, workdir, prefix
     if params:      
       clf = clf_model(**params)
     else:
-      clf = clf_model
+      clf = pickle.load(clf_model.open('rb'))
 
     clf.fit(x_train, y_train)
     pickle.dump(clf, open((workdir/f'models/{prefix}_seed_{seed}.pkl'), 'wb'))

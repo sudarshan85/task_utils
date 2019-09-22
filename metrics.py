@@ -137,11 +137,11 @@ class MultiAvgMetrics(object):
       class_names = list(range(self.n_classes))
       
     metrics = {
-        'sensitivity': list(self.sensitivity_avg() * 100),
-        'specificity': list(self.specificity_avg() * 100),
-        'ppv': list(self.ppv_avg() * 100),
-        'npv': list(self.npv_avg() * 100),
-        'f1': list(self.f1_avg() * 100),
+        'sensitivity': list(self.sensitivity_avg()),
+        'specificity': list(self.specificity_avg()),
+        'ppv': list(self.ppv_avg()),
+        'npv': list(self.npv_avg()),
+        'f1': list(self.f1_avg()),
       }
     
     return pd.DataFrame(metrics.values(), index=metrics.keys(), columns=class_names)
@@ -152,9 +152,9 @@ class MultiAvgMetrics(object):
     f1 = np.array([f1_score(targ, pred, average='weighted') for targ, pred in zip(self.targs, self.preds)]).mean()
     
     metrics = {
-    'sensitivity': np.round((sensitivity * 100), self.decimal),
-    'ppv': np.round((ppv * 100), self.decimal),
-    'f1': np.round((f1 * 100), self.decimal),
+    'sensitivity': np.round((sensitivity), self.decimal),
+    'ppv': np.round((ppv), self.decimal),
+    'f1': np.round((f1), self.decimal),
   }
     
     return pd.DataFrame(metrics.values(), index=metrics.keys(), columns=['Value'])  
@@ -270,12 +270,12 @@ class BinaryAvgMetrics(object):
     }
     if conf is None:
       metrics = {
-        'sensitivity': [self.sensitivity_avg() * 100],
-        'specificity': [self.specificity_avg() * 100],
-        'ppv': [self.ppv_avg() * 100],
-        'auroc': [self.auroc_avg() * 100],
-        'npv': [self.npv_avg() * 100],
-        'f1': [self.f1_avg() * 100],
+        'sensitivity': [self.sensitivity_avg()],
+        'specificity': [self.specificity_avg()],
+        'ppv': [self.ppv_avg()],
+        'auroc': [self.auroc_avg()],
+        'npv': [self.npv_avg()],
+        'f1': [self.f1_avg()],
       }
 
       if defn:
@@ -289,12 +289,12 @@ class BinaryAvgMetrics(object):
 
     else:
       metrics = {
-        'sensitivity': [*[value * 100 for value in self.sensitivity_avg(conf)]],        
-        'specificity': [*[value * 100 for value in self.specificity_avg(conf)]],
-        'ppv': [*[value * 100 for value in self.ppv_avg(conf)]],
-        'auroc': [*[value * 100 for value in self.auroc_avg(conf)]],   
-        'npv': [*[value * 100 for value in self.npv_avg(conf)]],
-        'f1': [*[value * 100 for value in self.f1_avg(conf)]],        
+        'sensitivity': [*[value for value in self.sensitivity_avg(conf)]],        
+        'specificity': [*[value for value in self.specificity_avg(conf)]],
+        'ppv': [*[value for value in self.ppv_avg(conf)]],
+        'auroc': [*[value for value in self.auroc_avg(conf)]],   
+        'npv': [*[value for value in self.npv_avg(conf)]],
+        'f1': [*[value for value in self.f1_avg(conf)]],        
       }
 
       if defn:
