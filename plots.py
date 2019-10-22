@@ -148,7 +148,7 @@ def plot_thresh_range(ax, y_true, prob, lower=0, upper=1, n_vals=5):
   ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5)
   ax.legend(loc='upper right')
 
-def threshold_guide(y_test, prob, ax, metric='youden', beta=None, n_vals=10, granularity=10):
+def threshold_guide(y_test, prob, ax=None, metric='youden', beta=None, n_vals=10, granularity=10):
   thresh_range = np.round(np.linspace(0, 1, n_vals), 2)
   cms = np.zeros((n_vals, 2, 2))
   
@@ -174,7 +174,6 @@ def threshold_guide(y_test, prob, ax, metric='youden', beta=None, n_vals=10, gra
     if beta is None:
       raise NameError(f"Weight value beta not specified for {metric}")    
     metrics = (1 + beta ** 2) * (se * ppv) / ((ppv) * (beta ** 2) + se)
-    metric = f'f{beta}'
   else:
     raise ValueError(f"{metric} is not a valid metric. Valid metrics are: 'youden', 'weighted_youden', 'f1', 'fbeta'")
    
@@ -183,14 +182,15 @@ def threshold_guide(y_test, prob, ax, metric='youden', beta=None, n_vals=10, gra
   df=df.stack().reset_index()
   df.columns = ['Metric','threshold', metric]
 
-  ax = sns.pointplot(x='threshold', y=metric,data=df)
-  ax.set_xlabel('Threshold')
-  ax.set_ylabel(metric)
-  ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
-  ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
-  tick_range = np.linspace(*ax.get_xlim(), granularity)
-  label_range = np.round(np.linspace(0, 1, granularity), 2)
-  ax.set_xticks(tick_range)
-  ax.set_xticklabels(label_range)
+  if ax:
+    ax = sns.pointplot(x='threshold', y=metric,data=df)
+    ax.set_xlabel('Threshold')
+    ax.set_ylabel(metric)
+    ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
+    ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
+    tick_range = np.linspace(*ax.get_xlim(), granularity)
+    label_range = np.round(np.linspace(0, 1, granularity), 2)
+    ax.set_xticks(tick_range)
+    ax.set_xticklabels(label_range)
   
   return df.loc[df[metric].idxmax()]['threshold'] 

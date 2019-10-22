@@ -160,12 +160,12 @@ class MultiAvgMetrics(object):
     return pd.DataFrame(metrics.values(), index=metrics.keys(), columns=['Value'])  
 
 class BinaryAvgMetrics(object):
-  def __init__(self, targets: List[int], predictions: List[int], probs: List[float], decimal=3) -> None:
-    assert (len(targets) == len(predictions) == len(probs)), f"Target list (length = {len(targets)}), predictions list (length = {len(predictions)}) and probabilities list (length = {len(probs)}) must all be of the same length!))"
+  def __init__(self, targets: List[int], predictions: List[int], pos_probs: List[float], decimal=3) -> None:
+    assert (len(targets) == len(predictions) == len(pos_probs)), f"Target list (length = {len(targets)}), predictions list (length = {len(predictions)}) and probabilities list (length = {len(pos_probs)}) must all be of the same length!))"
     self.targs = targets
     self.n_runs = len(self.targs)
     self.preds = predictions
-    self.probs = probs
+    self.pos_probs = pos_probs
     self.decimal = 3
     
     self.cms = np.zeros((len(self.targs), 2, 2), dtype=np.int64)
@@ -250,10 +250,10 @@ class BinaryAvgMetrics(object):
     return np.round(f1.mean(), self.decimal)
 
   def aurocs(self):
-    return np.array([roc_auc_score(targ, prob) for targ, prob in zip(self.targs, self.probs)])
+    return np.array([roc_auc_score(targ, prob) for targ, prob in zip(self.targs, self.pos_probs)])
 
   def auroc_avg(self, conf=None):
-    auroc = np.array([roc_auc_score(targ, prob) for targ, prob in zip(self.targs, self.probs)])
+    auroc = np.array([roc_auc_score(targ, prob) for targ, prob in zip(self.targs, self.pos_probs)])
     if conf is not None:
       return _mean_confidence_interval(auroc, conf)
 
@@ -344,7 +344,7 @@ def get_best_model(bam: BinaryAvgMetrics, fnames: List[str]):
       best_f1 = f1
       best_f1_model = fnames[i]    
 
-  for i, (targ, prob) in enumerate(zip(bam.targs, bam.probs)):
+  for i, (targ, prob) in enumerate(zip(bam.targs, bam.pos_probs)):
     auroc = roc_auc_score(targ, prob)
     if best_auroc < auroc:
       best_auroc = auroc
