@@ -11,7 +11,7 @@ import seaborn as sns
 from typing import List
 from scipy import interp
 from wordcloud import WordCloud
-from spacy.lang.en.stop_words import STOP_WORDS
+from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS as STOP_WORDS
 from sklearn.metrics import roc_auc_score, roc_curve, auc, confusion_matrix
 from sklearn.metrics import average_precision_score, precision_recall_curve
 
