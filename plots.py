@@ -9,7 +9,7 @@ from matplotlib import ticker
 import seaborn as sns
 
 from typing import List
-from scipy import interp
+from scipy import interp, stats
 from wordcloud import WordCloud
 from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS as STOP_WORDS
 from sklearn.metrics import roc_auc_score, roc_curve, auc, confusion_matrix
@@ -194,3 +194,51 @@ def threshold_guide(y_test, prob, ax=None, metric='youden', beta=None, n_vals=10
     ax.set_xticklabels(label_range)
   
   return df.loc[df[metric].idxmax()]['threshold'] 
+
+def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
+  thresh_range = np.round(np.linspace(0, 0.97, n_vals), 2)
+  cms = np.zeros((n_vals, 2, 2))
+  for i, thresh in enumerate(thresh_range):
+    y_pred = (pos_prob > thresh).astype(np.int64)
+    cms[i] = confusion_matrix(y_test, y_pred)
+
+  se = cms[:, 1, 1] / (cms[:, 1, 1] + cms[:, 1, 0])
+  sp = cms[:, 0, 0] / (cms[:, 0, 0] + cms[:, 0, 1])
+  ppv = cms[:, 1, 1] / (cms[:, 1, 1] + cms[:, 0, 1])
+
+  youden = se + sp
+  f1 = stats.hmean([se, ppv])
+  fyhmean = stats.hmean([youden, f1])
+
+  youden = youden.reshape(1,-1)
+  f1 = f1.reshape(1, -1)
+  fyhmean = fyhmean.reshape(1, -1)
+
+  youden_df = pd.DataFrame(youden, index=['youden'], columns=thresh_range)
+  youden_df = youden_df.stack().reset_index()
+  youden_df.columns = ['Metric','threshold', 'value']
+
+  f1_df = pd.DataFrame(f1, index=['f1'], columns=thresh_range)
+  f1_df= f1_df.stack().reset_index()
+  f1_df.columns = ['Metric','threshold', 'value']
+
+  fyhmean_df = pd.DataFrame(fyhmean, index=['fyhmean'], columns=thresh_range)
+  fyhmean_df = fyhmean_df.stack().reset_index()
+  fyhmean_df.columns = ['Metric','threshold', 'value']
+
+  best_fyhm = fyhmean_df.loc[fyhmean_df['value'].idxmax()]['threshold']
+  best_f1 = f1_df.loc[f1_df['value'].idxmax()]['threshold']
+  best_youden = youden_df.loc[youden_df['value'].idxmax()]['threshold']
+
+  ax.plot(youden_df['threshold'], youden_df['value'], color='r', label='Youden Index', linestyle='--', marker='o')
+  ax.plot(f1_df['threshold'], f1_df['value'], label='F1 Score', color='g', linestyle='--', marker='o')
+  ax.plot(fyhmean_df['threshold'], fyhmean_df['value'], label='Harmonic Mean of Youden & F1', color='b', linestyle='--', marker='o')
+  ax.set_xlabel('Threshold')
+  ax.set_ylabel('Metric Value')
+  ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
+  ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
+  ax.set_xlim(0, 1)
+  ax.set_xticks(np.arange(0, 1, 0.03))
+  ax.legend()
+
+  return best_youden, best_fyhm, best_f1, 
