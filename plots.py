@@ -123,10 +123,8 @@ def plot_mean_roc(ax, y_true, y_probas):
   ax.set_xlabel('False Positive Rate', fontsize='medium')
   ax.set_ylabel('True Positive Rate', fontsize='medium')
   ax.tick_params(labelsize='medium')
-  ax.legend(loc='lower right', fontsize='medium')
-  
-  return mean_roc  
-
+  ax.legend(loc='upper left', fontsize='medium')
+    
 def plot_thresh_range(ax, y_true, prob, lower=0, upper=1, n_vals=5):
   metrics = np.zeros((4, n_vals))
   thresh_range = np.round(np.linspace(lower, upper, n_vals), 2)
@@ -242,3 +240,23 @@ def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
   ax.legend()
 
   return best_youden, best_fyhm, best_f1, 
+
+def plot_cm(ax, cm, labels, normalize=True, title=None, cmap=plt.cm.Blues):
+  if normalize:
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+  im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+  ax.figure.colorbar(im, ax=ax)
+
+  # We want to show all ticks and label them with the respective list entries
+  ax.set(xticks=np.arange(cm.shape[1]), yticks=np.arange(cm.shape[0]), xticklabels=labels, yticklabels=labels, title=title, ylabel='True label', xlabel='Predicted label')
+
+  # Rotate the tick labels and set their alignment.
+  plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+
+  # Loop over data dimensions and create text annotations.
+  fmt = '.2f' if normalize else 'd'
+  thresh = cm.max() / 2.
+  for i in range(cm.shape[0]):
+    for j in range(cm.shape[1]):
+      ax.text(j, i, format(cm[i, j], fmt), ha='center', va='center', color='white' if cm[i, j] > thresh else 'black')
