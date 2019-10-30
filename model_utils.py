@@ -16,7 +16,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm import trange
 
 from .data_utils import set_group_splits
-from .tokenizer import tokenize
+# from .tokenizer import tokenize
 from sklearn.model_selection import RandomizedSearchCV
 
 def get_best_params(clf, x_train, y_train, param_space, **kwargs):
