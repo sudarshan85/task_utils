@@ -194,7 +194,8 @@ def threshold_guide(y_test, prob, ax=None, metric='youden', beta=None, n_vals=10
   return df.loc[df[metric].idxmax()]['threshold'] 
 
 def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
-  thresh_range = np.round(np.linspace(0, 0.97, n_vals), 2)
+  upper = 0.9
+  thresh_range = np.round(np.linspace(0, upper, n_vals), 2)
   cms = np.zeros((n_vals, 2, 2))
   for i, thresh in enumerate(thresh_range):
     y_pred = (pos_prob > thresh).astype(np.int64)
@@ -235,8 +236,8 @@ def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
   ax.set_ylabel('Metric Value')
   ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
   ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
-  ax.set_xlim(0, 1)
-  ax.set_xticks(np.arange(0, 1, 0.03))
+  ax.set_xlim(0, upper+0.01)
+  ax.set_xticks(np.arange(0, upper, 0.05))
   ax.legend()
 
   return best_youden, best_fyhm, best_f1, 
