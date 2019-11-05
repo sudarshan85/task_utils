@@ -125,7 +125,8 @@ def plot_mean_roc(ax, y_true, y_probas):
   ax.tick_params(labelsize='medium')
   ax.legend(loc='upper left', fontsize='medium')
     
-def plot_thresh_range(ax, y_true, prob, lower=0, upper=1, n_vals=5):
+def plot_thresh_range(ax, y_true, prob, n_vals=5):
+  lower,upper = 0.1,0.9
   metrics = np.zeros((4, n_vals))
   thresh_range = np.round(np.linspace(lower, upper, n_vals), 2)
 
@@ -141,10 +142,11 @@ def plot_thresh_range(ax, y_true, prob, lower=0, upper=1, n_vals=5):
   df = pd.DataFrame(metrics, index=['sensitivity', 'specificity', 'ppv', 'npv'], columns=thresh_range)
   df=df.stack().reset_index()
   df.columns = ['Metric','Threshold','Value']
-  ax = sns.pointplot(x='Threshold', y='Value', hue='Metric',data=df)
-  ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
-  ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5)
-  ax.legend(loc='upper right')
+  ax.plot(df.loc[df['Metric'] == 'sensitivity']['Threshold'], df.loc[df['Metric'] == 'sensitivity']['Value'], color='r', label='Sensitivity', linestyle='--', marker='o')
+  ax.plot(df.loc[df['Metric'] == 'specificity']['Threshold'], df.loc[df['Metric'] == 'specificity']['Value'], color='b', label='Specificity', linestyle='--', marker='o')
+  ax.plot(df.loc[df['Metric'] == 'ppv']['Threshold'], df.loc[df['Metric'] == 'ppv']['Value'], color='g', label='PPV', linestyle='--', marker='o')
+  ax.plot(df.loc[df['Metric'] == 'npv']['Threshold'], df.loc[df['Metric'] == 'npv']['Value'], color='m', label='NPV', linestyle='--', marker='o')
+  ax.legend()
 
 def threshold_guide(y_test, prob, ax=None, metric='youden', beta=None, n_vals=10, granularity=10):
   thresh_range = np.round(np.linspace(0, 1, n_vals), 2)
@@ -207,11 +209,9 @@ def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
 
   youden = se + sp - 1
   f1 = stats.hmean([se, ppv])
-  fyhmean = stats.hmean([youden, f1])
 
   youden = youden.reshape(1,-1)
   f1 = f1.reshape(1, -1)
-  fyhmean = fyhmean.reshape(1, -1)
 
   youden_df = pd.DataFrame(youden, index=['youden'], columns=thresh_range)
   youden_df = youden_df.stack().reset_index()
@@ -221,17 +221,11 @@ def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
   f1_df= f1_df.stack().reset_index()
   f1_df.columns = ['Metric','threshold', 'value']
 
-  fyhmean_df = pd.DataFrame(fyhmean, index=['fyhmean'], columns=thresh_range)
-  fyhmean_df = fyhmean_df.stack().reset_index()
-  fyhmean_df.columns = ['Metric','threshold', 'value']
-
-  best_fyhm = fyhmean_df.loc[fyhmean_df['value'].idxmax()]['threshold']
   best_f1 = f1_df.loc[f1_df['value'].idxmax()]['threshold']
   best_youden = youden_df.loc[youden_df['value'].idxmax()]['threshold']
 
   ax.plot(youden_df['threshold'], youden_df['value'], color='r', label='Youden Index', linestyle='--', marker='o')
   ax.plot(f1_df['threshold'], f1_df['value'], label='F1 Score', color='g', linestyle='--', marker='o')
-  ax.plot(fyhmean_df['threshold'], fyhmean_df['value'], label='Harmonic Mean of Youden & F1', color='b', linestyle='--', marker='o')
   ax.set_xlabel('Threshold')
   ax.set_ylabel('Metric Value')
   ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
@@ -240,7 +234,7 @@ def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
   ax.set_xticks(np.arange(0, upper, 0.05))
   ax.legend()
 
-  return best_youden, best_fyhm, best_f1, 
+  return best_youden, best_f1, 
 
 def plot_cm(ax, cm, labels, normalize=True, title=None, cmap=plt.cm.Blues):
   if normalize:
