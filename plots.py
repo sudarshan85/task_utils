@@ -146,7 +146,7 @@ def plot_thresh_range(ax, y_true, prob, n_vals=5):
   ax.plot(df.loc[df['Metric'] == 'specificity']['Threshold'], df.loc[df['Metric'] == 'specificity']['Value'], color='b', label='Specificity', linestyle='--', marker='o')
   ax.plot(df.loc[df['Metric'] == 'ppv']['Threshold'], df.loc[df['Metric'] == 'ppv']['Value'], color='g', label='PPV', linestyle='--', marker='o')
   ax.plot(df.loc[df['Metric'] == 'npv']['Threshold'], df.loc[df['Metric'] == 'npv']['Value'], color='m', label='NPV', linestyle='--', marker='o')
-  ax.legend()
+  ax.legend(loc='upper right')
 
 def threshold_guide(y_test, prob, ax=None, metric='youden', beta=None, n_vals=10, granularity=10):
   thresh_range = np.round(np.linspace(0, 1, n_vals), 2)
