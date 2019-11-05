@@ -205,7 +205,7 @@ def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
   sp = cms[:, 0, 0] / (cms[:, 0, 0] + cms[:, 0, 1])
   ppv = cms[:, 1, 1] / (cms[:, 1, 1] + cms[:, 0, 1])
 
-  youden = se + sp
+  youden = se + sp - 1
   f1 = stats.hmean([se, ppv])
   fyhmean = stats.hmean([youden, f1])
 
