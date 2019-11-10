@@ -125,8 +125,7 @@ def plot_mean_roc(ax, y_true, y_probas):
   ax.tick_params(labelsize='medium')
   ax.legend(loc='upper left', fontsize='medium')
     
-def plot_thresh_range(ax, y_true, prob, n_vals=5):
-  lower,upper = 0.1,0.9
+def plot_thresh_range(ax, y_true, prob, lower=0.1, upper=0.9, n_vals=5):
   metrics = np.zeros((4, n_vals))
   thresh_range = np.round(np.linspace(lower, upper, n_vals), 2)
 
@@ -195,9 +194,8 @@ def threshold_guide(y_test, prob, ax=None, metric='youden', beta=None, n_vals=10
   
   return df.loc[df[metric].idxmax()]['threshold'] 
 
-def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
-  upper = 0.9
-  thresh_range = np.round(np.linspace(0, upper, n_vals), 2)
+def plot_thresh_metric(ax, y_test, pos_prob, lower=0.0, upper=0.9, n_vals=10):
+  thresh_range = np.round(np.linspace(lower, upper, n_vals), 2)
   cms = np.zeros((n_vals, 2, 2))
   for i, thresh in enumerate(thresh_range):
     y_pred = (pos_prob > thresh).astype(np.int64)
@@ -230,8 +228,8 @@ def plot_thresh_metric(ax, y_test, pos_prob, n_vals=10):
   ax.set_ylabel('Metric Value')
   ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
   ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
-  ax.set_xlim(0, upper+0.01)
-  ax.set_xticks(np.arange(0, upper, 0.05))
+  ax.set_xlim(lower, upper+0.01)
+  ax.set_xticks(np.arange(lower, upper, 0.05))
   ax.legend()
 
   return best_youden, best_f1, 
