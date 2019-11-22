@@ -305,6 +305,14 @@ class BinaryAvgMetrics(object):
         d = pd.DataFrame(metrics.values(), index=metrics.keys(), columns=['Mean', 'Lower', 'Upper'])
 
       return d
+
+  def yield_metrics(self):
+    yield ('Sensitivity', self.sensitivities())
+    yield ('Specificity', self.specificities())
+    yield ('PPV', self.ppvs())
+    yield ('AUC', self.aurocs())
+    yield ('NPV', self.npvs())
+    yield ('F1', self.f1s())
   
   def __repr__(self):
     s = f"Number of Runs: {self.n_runs}\n"
