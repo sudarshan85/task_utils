@@ -194,7 +194,7 @@ def threshold_guide(y_test, prob, ax=None, metric='youden', beta=None, n_vals=10
   
   return df.loc[df[metric].idxmax()]['threshold'] 
 
-def plot_thresh_metric(ax, y_test, pos_prob, lower=0.0, upper=0.9, n_vals=10):
+def plot_thresh_metric(ax, y_test, pos_prob, lower=0.0, upper=0.9, n_vals=10, show_f1=True):
   thresh_range = np.round(np.linspace(lower, upper, n_vals), 2)
   cms = np.zeros((n_vals, 2, 2))
   for i, thresh in enumerate(thresh_range):
@@ -206,31 +206,29 @@ def plot_thresh_metric(ax, y_test, pos_prob, lower=0.0, upper=0.9, n_vals=10):
   ppv = cms[:, 1, 1] / (cms[:, 1, 1] + cms[:, 0, 1])
 
   youden = se + sp - 1
-  f1 = stats.hmean([se, ppv])
-
   youden = youden.reshape(1,-1)
-  f1 = f1.reshape(1, -1)
-
   youden_df = pd.DataFrame(youden, index=['youden'], columns=thresh_range)
   youden_df = youden_df.stack().reset_index()
   youden_df.columns = ['Metric','threshold', 'value']
-
-  f1_df = pd.DataFrame(f1, index=['f1'], columns=thresh_range)
-  f1_df= f1_df.stack().reset_index()
-  f1_df.columns = ['Metric','threshold', 'value']
-
-  best_f1 = f1_df.loc[f1_df['value'].idxmax()]['threshold']
   best_youden = youden_df.loc[youden_df['value'].idxmax()]['threshold']
-
   ax.plot(youden_df['threshold'], youden_df['value'], color='r', label='Youden Index', linestyle='--', marker='o')
-  ax.plot(f1_df['threshold'], f1_df['value'], label='F1 Score', color='g', linestyle='--', marker='o')
   ax.set_xlabel('Threshold')
   ax.set_ylabel('Metric Value')
   ax.grid(b=True, which='major', color='#d3d3d3', linewidth=1.0)
   ax.grid(b=True, which='minor', color='#d3d3d3', linewidth=0.5) 
   ax.set_xlim(lower, upper+0.01)
   ax.set_xticks(np.arange(lower, upper, 0.05))
-  ax.legend()
+  best_f1 = None
+
+  if show_f1:
+    f1 = stats.hmean([se, ppv])  
+    f1 = f1.reshape(1, -1)
+    f1_df = pd.DataFrame(f1, index=['f1'], columns=thresh_range)
+    f1_df= f1_df.stack().reset_index()
+    f1_df.columns = ['Metric','threshold', 'value']
+    best_f1 = f1_df.loc[f1_df['value'].idxmax()]['threshold']
+    ax.plot(f1_df['threshold'], f1_df['value'], label='F1 Score', color='g', linestyle='--', marker='o')
+    ax.legend()
 
   return best_youden, best_f1, 
 
