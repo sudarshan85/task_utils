@@ -2,16 +2,16 @@
 
 import pandas as pd
 import numpy as np
-from imblearn.over_sampling import RandomOverSampler
+# from imblearn.over_sampling import RandomOverSampler
 from sklearn.model_selection import train_test_split, GroupShuffleSplit
 
-def balanced_sample(x, y, pct=1.0, seed=None):
-  sampler = RandomOverSampler(random_state=seed)
-  x_resample, y_resample = sampler.fit_resample(x, y)
-  x_resample = x_resample.reshape(-1)
-  assert(x_resample.shape[0] == y_resample.shape[0])
-  idxs = np.random.choice(x_resample.shape[0], np.int64(x_resample.shape[0] * pct))
-  return x_resample[idxs], y_resample[idxs]
+# def balanced_sample(x, y, pct=1.0, seed=None):
+#   sampler = RandomOverSampler(random_state=seed)
+#   x_resample, y_resample = sampler.fit_resample(x, y)
+#   x_resample = x_resample.reshape(-1)
+#   assert(x_resample.shape[0] == y_resample.shape[0])
+#   idxs = np.random.choice(x_resample.shape[0], np.int64(x_resample.shape[0] * pct))
+#   return x_resample[idxs], y_resample[idxs]
 
 def test(a,b,cmp,cname=None):
   if cname is None: cname=cmp.__name__
