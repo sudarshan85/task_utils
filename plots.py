@@ -125,7 +125,7 @@ def plot_mean_roc(ax, y_true, y_probas):
   ax.tick_params(labelsize='medium')
   ax.legend(loc='upper left', fontsize='medium')
     
-def plot_thresh_range(ax, y_true, prob, lower=0.1, upper=0.9, n_vals=5):
+def plot_thresh_range(ax, y_true, prob, lower=0.1, upper=0.9, n_vals=5, show_npv=False):
   metrics = np.zeros((4, n_vals))
   thresh_range = np.round(np.linspace(lower, upper, n_vals), 2)
 
@@ -144,7 +144,9 @@ def plot_thresh_range(ax, y_true, prob, lower=0.1, upper=0.9, n_vals=5):
   ax.plot(df.loc[df['Metric'] == 'sensitivity']['Threshold'], df.loc[df['Metric'] == 'sensitivity']['Value'], color='r', label='Sensitivity', linestyle='--', marker='o')
   ax.plot(df.loc[df['Metric'] == 'specificity']['Threshold'], df.loc[df['Metric'] == 'specificity']['Value'], color='b', label='Specificity', linestyle='--', marker='o')
   ax.plot(df.loc[df['Metric'] == 'ppv']['Threshold'], df.loc[df['Metric'] == 'ppv']['Value'], color='g', label='PPV', linestyle='--', marker='o')
-  ax.plot(df.loc[df['Metric'] == 'npv']['Threshold'], df.loc[df['Metric'] == 'npv']['Value'], color='m', label='NPV', linestyle='--', marker='o')
+
+  if show_npv:
+    ax.plot(df.loc[df['Metric'] == 'npv']['Threshold'], df.loc[df['Metric'] == 'npv']['Value'], color='m', label='NPV', linestyle='--', marker='o')
   ax.legend(loc='upper right')
 
 def threshold_guide(y_test, prob, ax=None, metric='youden', beta=None, n_vals=10, granularity=10):
