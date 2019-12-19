@@ -259,7 +259,7 @@ class BinaryAvgMetrics(object):
 
     return np.round(auroc.mean(), self.decimal)
 
-  def get_avg_metrics(self, conf=None, defn=False):
+  def get_all_avg_metrics(self, conf=None, defn=False):
     definitions = {
       'sensitivity': "When it's ACTUALLY YES, how often does it PREDICT YES?",
       'specificity': "When it's ACTUALLY NO, how often does it PREDICT NO?",
@@ -305,6 +305,48 @@ class BinaryAvgMetrics(object):
         d = pd.DataFrame(metrics.values(), index=metrics.keys(), columns=['Mean', 'Lower', 'Upper'])
 
       return d
+
+  def get_main_avg_metrics(self, conf=None, defn=False):
+    definitions = {
+      'sensitivity': "When it's ACTUALLY YES, how often does it PREDICT YES?",
+      'specificity': "When it's ACTUALLY NO, how often does it PREDICT NO?",
+      'ppv': "When it PREDICTS YES, how often is it correct?",
+      'auroc': "Indicates how well the model is capable of distinguishing between classes",
+    }
+    if conf is None:
+      metrics = {
+        'sensitivity': [self.sensitivity_avg()],
+        'specificity': [self.specificity_avg()],
+        'ppv': [self.ppv_avg()],
+        'auroc': [self.auroc_avg()],
+      }
+
+      if defn:
+        for metric, value in metrics.items():
+          value.append(definitions[metric])
+        d = pd.DataFrame(metrics.values(), index=metrics.keys(), columns=['Value', 'Definition'])
+      else:
+        d = pd.DataFrame(metrics.values(), index=metrics.keys(), columns=['Value'])
+
+      return d
+
+    else:
+      metrics = {
+        'sensitivity': [*[value for value in self.sensitivity_avg(conf)]],        
+        'specificity': [*[value for value in self.specificity_avg(conf)]],
+        'ppv': [*[value for value in self.ppv_avg(conf)]],
+        'auroc': [*[value for value in self.auroc_avg(conf)]],   
+      }
+
+      if defn:
+        for metric, value in metrics.items():
+          value.append(definitions[metric])
+        d = pd.DataFrame(metrics.values(), index=metrics.keys(), columns=['Mean', 'Lower', 'Upper', 'Definition'])
+      else:
+        d = pd.DataFrame(metrics.values(), index=metrics.keys(), columns=['Mean', 'Lower', 'Upper'])
+
+      return d
+
 
   def yield_metrics(self):
     yield ('Sensitivity', self.sensitivities())
